@@ -49,8 +49,8 @@ else { //timeout, or lastResultOK() was false
 
 ```
 void myCallback(bool ok){
-    if( not ok ) return;
-    /* do something */
+    if( ok ) /* do something */
+    else /* do something else */
 }
 
 twim.callback(myCallback);
