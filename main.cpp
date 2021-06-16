@@ -26,7 +26,7 @@ int main(){
 }
 #else //callback version
 
-//callback from ds3231.readCallback()
+//callback from ds3231.update()
 //callbacks from twi provide the bool result and have already sent a stop
 static void twimCallback(bool ok){
     static u8 secondsPrev;
