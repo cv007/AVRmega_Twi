@@ -45,6 +45,18 @@ else { //timeout, or lastResultOK() was false
        if so, may want to twim.off() to reset twi */ 
 }
 ````
+**You can also use a callback if wanted, which will occur after the transaction is done and the stop command was just sent. The callback is provided an argument with the lastResultOK_ value.**
+
+```
+void myCallback(bool ok){
+    if( not ok ) return;
+    /* do something */
+}
+
+twim.callback(myCallback);
+//do normal twi things, the callback will be called at the next stop command with lastResultOK_ as the argument
+
+```
 
 **The code is simple, so if you want to change anything, then simply change it to suit your needs.**
 
