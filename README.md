@@ -13,7 +13,7 @@
 #include "Twim.hpp"
 ISR(TWI_vect){ Twim::isr(); }
 ```
-**then in whatever source file you need to use twi (will typically be like the Ds3231.hpp header)**
+**then in whatever source file you need to use twi (will typically be like the Ds3231.hpp header- although that is not a great example as it is mainly being used to test twi and is not being used as it should be)**
 ```
 #include "MyAvr.hpp" //some universal things everyone should include
 #include "Twim.hpp" //header only
