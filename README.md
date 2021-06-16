@@ -5,10 +5,20 @@
 
 **usage**
 ```
+//first create an Isr.cpp file, which is simple-
+#include "MyAvr.hpp"
+#include "Twim.hpp"
+ISR(TWI_vect){ Twim::isr(); }
+```
+
+
+**then in whatever source file you need to use twi (will typically be like the Ds3231.hpp header)**
+```
 #include "MyAvr.hpp" //some universal things everyone should include
 #include "Twim.hpp" //header only
 
 Twim twim; //create instance, or can skip since it is all static functions
+           //example- Twim::address(0x68) is same as twim.address(0x68)
 
 twim.address( 0x68 ); //set address, remains in use until changed
 //if interrupts not on, they will need to be one
@@ -33,8 +43,7 @@ else { //timeout, or lastResultOK() was false
     /* can check isBusy() to see if was timeout, 
        if so, may want to twim.off() to reset twi */ 
 }
+````
 
+**The code is simple, so if you want to change it, change it to your liking.**
 
-The code is simple, so if you want to change it, change it to your liking.
-
-```
