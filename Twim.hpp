@@ -32,6 +32,9 @@ class Twim {
     public:
 //-----------
 
+                using
+callbackT       = void(*)(bool); //bool = lastResultOK_
+
                 enum
 SPEED           { KHZ100 = 100000ul, KHZ400 = 400000ul };
 
@@ -42,12 +45,14 @@ SPEED           { KHZ100 = 100000ul, KHZ400 = 400000ul };
 CMD             { START = 0xA5, STOP = 0x94, ACK = 0xC5, NACK = 0x85  };
 
 
-
                 static auto
 off             (){ TWCR = 0; }
 
                 static auto //will also reset twi (off)
 address         (uint8_t addr){ off(); addr_ = addr<<1; }
+
+                static auto
+callback        (callbackT cb){ callback_ = cb; }
 
                 //will be set to 100kHz if no one specifies
                 static void //(fcpu/speed/2)-8, 16MHz- 100kHz = 72, 400kHz = 12
@@ -79,9 +84,14 @@ waitUS          (uint16_t us)
 writeRead       (uint8_t* wbuf, uint8_t wlen, uint8_t* rbuf, uint8_t rlen)
                 {
                 wbuf_ = wbuf;
-                wbufEnd_ = wbuf+wlen;
+                //make sure wbuf is not 0 before setting the end address
+                //in case someone sneaks in a wlen >0 when wbuf was 0
+                //(of course no way to check if wlen is actually valid, unless
+                // the template versions below are used when length is in the type)
+                wbufEnd_ = wbuf ? wbuf+wlen : wbuf;
                 rbuf_ = rbuf;
-                rbufEnd_ = rbuf+rlen;
+                //same check as abive
+                rbufEnd_ = rbuf ? rbuf+rlen : rbuf;
                 startIrq();
                 }
 
@@ -149,8 +159,8 @@ isr             ()
                     case 11: //read nack'd (by us)
                         *rbuf_++ = TWDR;
                         if( rbuf_ >= rbufEnd_ ){ //if no more
-                            stop(); //we already nack'd, now need stop
                             lastResultOK_ = true;
+                            stop(); //we already nack'd, now need stop
                             return;
                             }
                         rbuf_ < (rbufEnd_-1) ? ack() : nack();
@@ -188,6 +198,7 @@ stop            () -> void
                 wbufEnd_ = 0;
                 rbuf_ = 0;
                 rbufEnd_ = 0;
+                if( callback_ ) callback_( lastResultOK_ );
                 }
 
                 static auto
@@ -200,6 +211,7 @@ ack             () -> void { TWCR = ACK; }
                 static inline uint8_t* wbufEnd_;
                 static inline uint8_t* rbuf_;
                 static inline uint8_t* rbufEnd_;
+                static inline callbackT callback_;
 
 };
 

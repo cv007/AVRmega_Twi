@@ -54,6 +54,29 @@ seconds         (u8& seconds)
                 return true;
                 }
 
+
+//callback testing
+
+                //read all registers, with callback to call when done
+                auto
+update          (Twim::callbackT cb)
+                {
+                if( twim_.isBusy() ) return false;
+                twim_.callback( cb );
+                twim_.address( SLAVE_ADDRESS );
+                //reg address start 0, will reuse the read buffer, which works ok
+                //in this case (buffer is private, and only we can read it)
+                registers_.all[0] = 0;
+                twim_.writeRead( registers_.all, 1, registers_.all, sizeof registers_.all );
+                return true;
+                }
+
+                //assumes caller knows data is good
+                auto
+seconds         ()
+                {
+                return registers_.seconds10 * 10 + registers_.seconds1;
+                }
 };
 
 

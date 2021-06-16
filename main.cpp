@@ -7,6 +7,7 @@ Ds3231 ds3231{ twim };
 
 static void togPC3(){ DDRC |= 1<<3; PINC |= 1<<3; } //togle PC3
 
+#if 0
 int main(){
 
     CLKPR = 0x80; CLKPR = 0; //1MHz -> 8MHz in case fused to 1MHz
@@ -23,4 +24,31 @@ int main(){
     }
 
 }
+#else //callback version
 
+//callback from ds3231.readCallback()
+//callbacks from twi provide the bool result and have already sent a stop
+static void twimCallback(bool ok){
+    static u8 secondsPrev;
+    if( not ok ) return; //failed, data no good
+    auto s = ds3231.seconds(); //ok, get seconds
+    if( s == secondsPrev ) return; //same as before?
+    secondsPrev = s; //save
+    togPC3(); //toggle every second
+}
+
+int main(){
+
+    CLKPR = 0x80; CLKPR = 0; //1MHz -> 8MHz in case fused to 1MHz
+
+    sei();
+
+    while(1){
+        //start a read of all registers, call twimCallback when done
+        while( not ds3231.update(twimCallback) ){} //if twi busy, keep trying
+        //do every 100ms
+        _delay_ms(100);
+    }
+
+}
+#endif
