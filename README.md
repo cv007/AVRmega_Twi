@@ -3,9 +3,9 @@
 #### tested on an ATmega168, using the example in main
 ----------
 
-**usage**
+**--usage--**
 
-**first create an Isr.cpp file, which is simple**
+**first create an Isr.cpp file, or place this in whichever source file you want**
 ```
 #include "MyAvr.hpp"
 #include "Twim.hpp"
@@ -20,7 +20,7 @@ Twim twim; //create instance, or can skip since it is all static functions
            //example- Twim::address(0x68) is same as twim.address(0x68)
 
 twim.address( 0x68 ); //set address, remains in use until changed
-//if interrupts not on, they will need to be one
+//if interrupts not on, they will need to be on
 sei(); //MyAvr.hpp has the include needed for this
 
 u8 wbuf[1] = { 0 }; //a write buffer which has the write data (if writing)
@@ -44,5 +44,5 @@ else { //timeout, or lastResultOK() was false
 }
 ````
 
-**The code is simple, so if you want to change it, change it to your liking.**
+**The code is simple, so if you want to change anything, then simply change it to suit your needs.**
 
