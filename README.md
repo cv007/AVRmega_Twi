@@ -5,6 +5,8 @@
 
 **--usage--**
 
+**You will need a C++17 capable compiler (gcc-avr 7.3.0 from Arduino will do), as the Twim.hpp header has static variables in the class header. Add the g++ option -std=c++17. It is not a requirement that the class functions/vars be static, but is a little simpler when you only have the capbility to use one instance anyway (only 1 twi peripheral), such as calling the isr() function from the twi_vect isr function will not need an instance.**
+
 **first create an Isr.cpp file, or place this in whichever source file you want**
 ```
 #include "MyAvr.hpp"
