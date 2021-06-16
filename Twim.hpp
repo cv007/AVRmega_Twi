@@ -79,9 +79,9 @@ waitUS          (uint16_t us)
 
 //the main write/read functions
 
-                //write+read, pointers+len (all versions end up here)
+                //write+read, pointers+len (all versions end up here, except writeWrite)
                 static void
-writeRead       (uint8_t* wbuf, uint8_t wlen, uint8_t* rbuf, uint8_t rlen)
+writeRead       (const uint8_t* wbuf, const uint8_t wlen, uint8_t* rbuf, const uint8_t rlen)
                 {
                 wbuf_ = wbuf;
                 //make sure wbuf is not 0 before setting the end address
@@ -92,8 +92,25 @@ writeRead       (uint8_t* wbuf, uint8_t wlen, uint8_t* rbuf, uint8_t rlen)
                 rbuf_ = rbuf;
                 //same check as abive
                 rbufEnd_ = rbuf ? rbuf+rlen : rbuf;
+                wbuf2_ = 0;
+                wbuf2End_ = 0;
                 startIrq();
                 }
+
+                //write+write (seperate buffers, both writing)
+                static void
+writeWrite      (const u8* wbuf, const u8 wlen, const u8* wbuf2, const u8 wlen2)
+                {
+                wbuf_ = wbuf;
+                wbufEnd_ = wbuf ? wbuf+wlen : wbuf;
+                wbuf2_ = wbuf2;
+                wbuf2End_ = wbuf2 ? wbuf2+wlen2 : wbuf2;
+                rbuf_ = 0;
+                rbufEnd_ = 0;
+                startIrq();
+                }
+
+
 
                 //write+read, len included in type
                 template<uint8_t NW, uint8_t NR>
@@ -102,6 +119,16 @@ writeRead       (uint8_t (&wbuf)[NW], uint8_t (&rbuf)[NR])
                 {
                 writeRead( wbuf, NW, rbuf, NR );
                 }
+
+
+                //write+write, len included in type (seperate buffers, both writing)
+                template<unsigned N1, unsigned N2>
+                static void
+writeWrite      (const u8 (&wbuf)[N1], const u8 (&wbuf2)[N2])
+                {
+                writeWrite( wbuf, N1, wbuf2, N2 );
+                }
+
 
                 //write only
                 static void
@@ -147,6 +174,7 @@ isr             ()
                     case 3: //addressW was ack'd
                     case 5: //write ack'd
                         if( wbuf_ < wbufEnd_ ){ TWDR = *wbuf_++; return ack(); } //write data
+                        if( wbuf2_ < wbuf2End_ ){ TWDR = *wbuf2_++; return ack(); } //write data
                         if( rbuf_ < rbufEnd_ ) return start(); //switch to read via repeated start if we have data to read
                         //did not switch to read, must be done (was write only)
                         lastResultOK_ = true;
@@ -196,6 +224,8 @@ stop            () -> void
                 TWCR = STOP;
                 wbuf_ = 0;
                 wbufEnd_ = 0;
+                wbuf2_ = 0;
+                wbuf2End_ = 0;
                 rbuf_ = 0;
                 rbufEnd_ = 0;
                 if( callback_ ) callback_( lastResultOK_ );
@@ -207,8 +237,10 @@ ack             () -> void { TWCR = ACK; }
 
                 static inline uint8_t addr_;
                 static inline bool lastResultOK_;
-                static inline uint8_t* wbuf_;
-                static inline uint8_t* wbufEnd_;
+                static inline const uint8_t* wbuf_;
+                static inline const uint8_t* wbufEnd_;
+                static inline const uint8_t* wbuf2_;
+                static inline const uint8_t* wbuf2End_;
                 static inline uint8_t* rbuf_;
                 static inline uint8_t* rbufEnd_;
                 static inline callbackT callback_;

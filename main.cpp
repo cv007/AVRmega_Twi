@@ -1,6 +1,7 @@
 #include "MyAvr.hpp"
 #include "Twim.hpp"
 #include "Ds3231.hpp"
+#include "Printer.hpp"
 
 Twim twim;
 Ds3231 ds3231{ twim };
@@ -35,6 +36,7 @@ static void twimCallback(bool ok){
     if( s == secondsPrev ) return; //same as before?
     secondsPrev = s; //save
     togPC3(); //toggle every second
+
 }
 
 int main(){
@@ -42,6 +44,8 @@ int main(){
     CLKPR = 0x80; CLKPR = 0; //1MHz -> 8MHz in case fused to 1MHz
 
     sei();
+
+    ds3231.clear();
 
     while(1){
         //start a read of all registers, call twimCallback when done

@@ -9,7 +9,7 @@
 class Ds3231 {
 
                 enum { SLAVE_ADDRESS = 0x68 };
-                enum { US_TIMEOUT = 2000 };
+                enum { US_TIMEOUT = 4000 };
 
                 //normally would have a struct of all register bits,
                 //but just have seconds here for a simple example
@@ -20,21 +20,22 @@ registersT      = union {
                         //0x00
                         u8 seconds1  : 4;
                         u8 seconds10 : 4;
+                        u8 minutes1  : 4;
+                        u8 minutes10 : 4;
                         //0x01, etc.
                     };
                 };
 
                 registersT registers_;
                 Twim& twim_;
+                u8 regAddr_[1];
 
                 auto
 readAll         ()
                 {
                 twim_.address( SLAVE_ADDRESS );
-                //reg address start 0, will reuse the read buffer, which works ok
-                //in this case (buffer is private, and only we can read it)
-                registers_.all[0] = 0;
-                twim_.writeRead( registers_.all, 1, registers_.all, sizeof registers_.all );
+                regAddr_[0] = 0;
+                twim_.writeRead( regAddr_, registers_.all );
                 return twim_.waitUS( US_TIMEOUT );
                 }
 
@@ -54,6 +55,14 @@ seconds         (u8& seconds)
                 return true;
                 }
 
+                auto
+clear           ()
+                { //clear all time registers
+                twim_.address( SLAVE_ADDRESS );
+                for( auto& r : registers_.all ) r = 0; //clear all buffer
+                twim_.writeWrite( regAddr_, 1, registers_.all, 0x0D );
+                return twim_.waitUS( US_TIMEOUT );
+                }
 
 //callback testing
 
