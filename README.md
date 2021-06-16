@@ -4,14 +4,13 @@
 ----------
 
 **usage**
+
+**first create an Isr.cpp file, which is simple**
 ```
-//first create an Isr.cpp file, which is simple-
 #include "MyAvr.hpp"
 #include "Twim.hpp"
 ISR(TWI_vect){ Twim::isr(); }
 ```
-
-
 **then in whatever source file you need to use twi (will typically be like the Ds3231.hpp header)**
 ```
 #include "MyAvr.hpp" //some universal things everyone should include
