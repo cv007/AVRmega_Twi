@@ -86,6 +86,11 @@ seconds         ()
                 {
                 return registers_.seconds10 * 10 + registers_.seconds1;
                 }
+                auto
+minutes         ()
+                {
+                return registers_.minutes10 * 10 + registers_.minutes1;
+                }
 };
 
 

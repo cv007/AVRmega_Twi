@@ -160,7 +160,7 @@ read            (uint8_t (&rbuf)[N])
                 writeRead( 0, 0, rbuf, N );
                 }
 
-//called from TWI_vecto isr
+//called from TWI_vect isr
                 static void
 isr             ()
                 {
