@@ -1,18 +1,27 @@
-#pragma once
+#pragma once //Twim.hpp
+
 #include "MyAvr.hpp"
 
-/*
+/*-------------------------------------------------------------
+    TWCR info
+
                 --TWCR--
                 TWINT TWEA TWSTA TWSTO TWWC TWEN - TWIE
-    START         1    x     1     0     0   1   0   1
-    STOP          1    x     0     1     0   1   0   0
-    ack           1    1     0     0     0   1   0   1
-    nack          1    0     0     0     0   1   0   1
-    ack/nack are for read, write can use ack or nack to keeep going (will use ack below)
+    START         1    x     1     0     0   1   0   1  0xA5
+    STOP          1    x     0     1     0   1   0   0  0x94
+    ack           1    1     0     0     0   1   0   1  0xC5
+    nack          1    0     0     0     0   1   0   1  0x85
+
+    ack/nack are for read
+    write can use either ack or nack to keep going since either are unused
+    (ack used in this code when writing)
 
     TWSR bits 7-3, bits 1:0 is TWPS prescaler
- shifted
- numbers >>3
+    hex value is with bits in register bit position, decimal number is value
+    shifted right by 3, code will shift TWSR right by 3 to get the decimal
+    status value as its easier to deal with these decimal numbers and the
+    prescale bits need to be removed in any case (mask vs shift)
+
     1   0x08 = start
     2   0x10 = repeated start
     3   0x18 = addressW+ack
@@ -24,8 +33,12 @@
     9   0x48 = addressR+nack
     10  0x50 = read+ack
     11  0x58 = read+nack
-*/
+--------------------------------------------------------------*/
 
+
+/*-------------------------------------------------------------
+    Twim - Twi Master
+--------------------------------------------------------------*/
 class Twim {
 
 //-----------
@@ -38,7 +51,7 @@ callbackT       = void(*)(bool); //bool = lastResultOK_
                 enum
 SPEED           { KHZ100 = 100000ul, KHZ400 = 400000ul };
 
-                //ACK = ack next rx (also ACK can be used for write, as ack/nack not used)
+                //ACK = ack next rx (ACK will also be used used for write)
                 //NACK = nack next rx
                 //STOP = stop,nack,irq off
                 enum
@@ -207,6 +220,7 @@ isr             ()
                 static void
 startIrq        ()
                 {
+                pinsInit();
                 lastResultOK_ = false;
                 if( not TWBR ) speed(); //if not set, set to default speed
                 start();
@@ -234,6 +248,14 @@ stop            () -> void
                 static auto
 ack             () -> void { TWCR = ACK; }
 
+                //set scl/sda pins - PC4/SDA, PC5/SCL
+                //add pullup in case no external pullups are being used
+                static auto
+pinsInit        () -> void
+                {
+                DDRC and_eq compl ((1<<4) bitor (1<<5)); //input
+                PORTC or_eq ((1<<4) bitor (1<<5)); //pullup
+                }
 
                 static inline uint8_t addr_;
                 static inline bool lastResultOK_;
