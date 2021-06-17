@@ -1,6 +1,8 @@
 ## C++ Twi driver for ATmega168 and its siblings
 
 #### tested on an ATmega168, using the example in main.cpp (included screenshot is the result)
+
+**I hauled out a mega168 to test this, and**
 ----------
 
 **--usage--**
