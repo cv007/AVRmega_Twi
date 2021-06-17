@@ -32,7 +32,7 @@ u8 rbuf[19]; //a read buffer (if reading)
 twim.writeRead( wbuf, rbuf ); //we want all the buffer used, so the sizes are already in the type
 twim.writeRead( wbuf, 1, rbuf, 1 ); //or we can specify sizes if less than all the buffere needed
 //there are also write only and read only versions, and also added a writeWrite version for when
-//you want to write from 2 buffers
+//you want to write from 2 buffers (command(s), then data)
 
 //the interrupt process is now started, and we need to either wait
 //or do something else end check back later
