@@ -2,7 +2,7 @@
 
 #### tested on an ATmega168, using the example in main.cpp (included screenshot is the result)
 
-####I have not used these older avr's in quite a while, and do not plan on using them, so this code was meant to only show a way to use the twi peripheral that is most likely more simple than other versions. The mega168 will go back in storage, and this repository will most likely not be updated.
+#### I have not used these older avr's in quite a while, and do not plan on using them, so this code was meant to only show a way to use the twi peripheral that is most likely more simple than other versions. The mega168 will go back in storage, and this repository will most likely not be updated.
 ----------
 
 **--usage--**
