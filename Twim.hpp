@@ -203,7 +203,7 @@ isr             ()
 //-----------
     private:
 //-----------
-                //start a transaction (called by write/read/writeRead)
+                //start a transaction (called by writeRead, writeWrite)
                 static void
 startIrq        ()
                 {
