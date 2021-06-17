@@ -13,12 +13,12 @@
     nack          1    0     0     0     0   1   0   1  0x85
 
     ack/nack are for read
-    write can use either ack or nack to keep going since either are unused
+    write can use either ack or nack to keep going since TWEA bit is unused
     (ack used in this code when writing)
 
-    TWSR bits 7-3, bits 1:0 is TWPS prescaler
-    hex value is with bits in register bit position, decimal number is value
-    shifted right by 3, code will shift TWSR right by 3 to get the decimal
+    TWSR status bits are 7-3, bits 1:0 are for TWPS prescaler
+    hex value below is with bits in register bit position, decimal number is
+    value shifted right by 3, code will shift TWSR right by 3 to get the decimal
     status value as its easier to deal with these decimal numbers and the
     prescale bits need to be removed in any case (mask vs shift)
 
@@ -50,12 +50,6 @@ callbackT       = void(*)(bool); //bool = lastResultOK_
 
                 enum
 SPEED           { KHZ100 = 100000ul, KHZ400 = 400000ul };
-
-                //ACK = ack next rx (ACK will also be used used for write)
-                //NACK = nack next rx
-                //STOP = stop,nack,irq off
-                enum
-CMD             { START = 0xA5, STOP = 0x94, ACK = 0xC5, NACK = 0x85  };
 
 
                 static auto
@@ -129,51 +123,38 @@ writeWrite      (const u8* wbuf, const u8 wlen, const u8* wbuf2, const u8 wlen2)
                 template<uint8_t NW, uint8_t NR>
                 static void
 writeRead       (uint8_t (&wbuf)[NW], uint8_t (&rbuf)[NR])
-                {
-                writeRead( wbuf, NW, rbuf, NR );
-                }
-
+                { writeRead( wbuf, NW, rbuf, NR ); }
 
                 //write+write, len included in type (seperate buffers, both writing)
                 template<unsigned N1, unsigned N2>
                 static void
 writeWrite      (const u8 (&wbuf)[N1], const u8 (&wbuf2)[N2])
-                {
-                writeWrite( wbuf, N1, wbuf2, N2 );
-                }
-
+                { writeWrite( wbuf, N1, wbuf2, N2 ); }
 
                 //write only
                 static void
 write           (uint8_t* wbuf, uint8_t wlen)
-                {
-                writeRead( wbuf, wlen, 0, 0 );
-                }
+                { writeRead( wbuf, wlen, 0, 0 ); }
 
                 //write only, len included in type
                 template<uint8_t N>
                 static void
 write           (uint8_t (&wbuf)[N])
-                {
-                writeRead( wbuf, N, 0, 0 );
-                }
+                { writeRead( wbuf, N, 0, 0 ); }
 
                 //read only
                 static void
 read            (uint8_t* rbuf, uint8_t rlen)
-                {
-                writeRead( 0, 0, rbuf, rlen );
-                }
+                { writeRead( 0, 0, rbuf, rlen ); }
 
                 //read only, len included in type
                 template<uint8_t N>
                 static void
 read            (uint8_t (&rbuf)[N])
-                {
-                writeRead( 0, 0, rbuf, N );
-                }
+                { writeRead( 0, 0, rbuf, N ); }
 
-//called from TWI_vect isr
+                //called from TWI_vect isr, can 'friend' the TWI_vect and keep
+                //this private, or as done here just leave it public
                 static void
 isr             ()
                 {
@@ -216,6 +197,13 @@ isr             ()
 //-----------
     private:
 //-----------
+
+                //ACK = ack next rx (ACK will also be used used for write)
+                //NACK = nack next rx
+                //STOP = stop,nack,irq off
+                enum
+CMD             { START = 0xA5, STOP = 0x94, ACK = 0xC5, NACK = 0x85  };
+
                 //start a transaction (called by writeRead, writeWrite)
                 static void
 startIrq        ()
